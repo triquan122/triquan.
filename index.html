@@ -1,1 +1,747 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Quest - Adventure Learning Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        .header {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .game-title {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(90deg, #00f5ff, #a855f7, #00f5ff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            max-width: 800px;
+            margin: 0 auto;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #00f5ff;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .exp-bar-container {
+            max-width: 600px;
+            margin: 20px auto 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 10px;
+        }
+
+        .exp-bar {
+            height: 25px;
+            background: linear-gradient(90deg, #a855f7, #00f5ff);
+            border-radius: 15px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exp-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: exp-shine 2s infinite;
+        }
+
+        @keyframes exp-shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .exp-text {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: #00f5ff;
+        }
+
+        /* Main Game Area */
+        .game-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .question-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .question-number {
+            color: #a855f7;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: #00f5ff;
+            font-weight: 600;
+        }
+
+        .question-example {
+            font-size: 1em;
+            color: #ccc;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .timer-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff006e, #ffbe0b);
+            transition: width 0.1s linear;
+        }
+
+        /* Answer Options */
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .answer-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .answer-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .answer-btn:hover {
+            background: rgba(0, 255, 255, 0.15);
+            border-color: #00f5ff;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .answer-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .answer-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .answer-btn.correct {
+            background: rgba(34, 197, 94, 0.3);
+            border-color: #22c55e;
+            animation: correct-flash 0.5s ease;
+        }
+
+        .answer-btn.wrong {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: #ef4444;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes correct-flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Combo & Feedback */
+        .combo-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 4em;
+            font-weight: bold;
+            color: #00f5ff;
+            text-shadow: 0 0 30px #00f5ff;
+            pointer-events: none;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .combo-display.show {
+            transform: translate(-50%, -50%) scale(1);
+            animation: combo-pulse 0.5s ease;
+        }
+
+        @keyframes combo-pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        .feedback-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .feedback-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            text-align: center;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .feedback-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .feedback-title {
+            font-size: 2em;
+            margin-bottom: 15px;
+            color: #00f5ff;
+        }
+
+        .feedback-text {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .continue-btn {
+            background: linear-gradient(90deg, #a855f7, #00f5ff);
+            border: none;
+            color: #fff;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .continue-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Start Screen */
+        .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .start-content {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .start-title {
+            font-size: 4em;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #00f5ff, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .start-subtitle {
+            font-size: 1.5em;
+            color: #ccc;
+            margin-bottom: 40px;
+        }
+
+        .start-btn {
+            background: linear-gradient(90deg, #a855f7, #00f5ff);
+            border: none;
+            color: #fff;
+            padding: 20px 60px;
+            border-radius: 15px;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0, 255, 255, 0.3);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Particles Background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00f5ff;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: float 6s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-30px) translateX(20px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 1.8em;
+            }
+            .question-text {
+                font-size: 1.3em;
+            }
+            .answers-grid {
+                grid-template-columns: 1fr;
+            }
+            .start-title {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particles Background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Start Screen -->
+    <div class="start-screen" id="startScreen">
+        <div class="start-content">
+            <h1 class="start-title">🎮 ENGLISH QUEST</h1>
+            <p class="start-subtitle">Học tiếng Anh qua phiêu lưu</p>
+            <button class="start-btn" onclick="startGame()">BẮT ĐẦU PHIÊU LƯU</button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <h1 class="game-title">⚔️ ENGLISH QUEST</h1>
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-label">Level</div>
+                <div class="stat-value" id="level">1</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Điểm</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Combo</div>
+                <div class="stat-value" id="combo">0</div>
+            </div>
+        </div>
+        <div class="exp-bar-container">
+            <div class="exp-bar" id="expBar" style="width: 0%"></div>
+            <div class="exp-text" id="expText">0 / 100 EXP</div>
+        </div>
+    </header>
+
+    <!-- Main Game -->
+    <main class="game-container">
+        <div class="question-card" id="questionCard">
+            <div class="question-number" id="questionNumber">Câu hỏi 1</div>
+            <div class="question-text" id="questionText">Loading...</div>
+            <div class="question-example" id="questionExample"></div>
+            <div class="timer-bar">
+                <div class="timer-fill" id="timerFill" style="width: 100%"></div>
+            </div>
+            <div class="answers-grid" id="answersGrid"></div>
+        </div>
+    </main>
+
+    <!-- Combo Display -->
+    <div class="combo-display" id="comboDisplay">🔥 COMBO x3!</div>
+
+    <!-- Feedback Overlay -->
+    <div class="feedback-overlay" id="feedbackOverlay">
+        <div class="feedback-card">
+            <div class="feedback-icon" id="feedbackIcon">✅</div>
+            <div class="feedback-title" id="feedbackTitle">Chính xác!</div>
+            <div class="feedback-text" id="feedbackText"></div>
+            <button class="continue-btn" onclick="nextQuestion()">Tiếp tục</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== GAME DATA ====================
+        const vocabulary = [
+            { word: "achievement", meaning: "thành tựu", example: "Winning the race was a great achievement.", level: 1 },
+            { word: "approach", meaning: "tiếp cận, phương pháp", example: "We need a new approach to solve this problem.", level: 1 },
+            { word: "benefit", meaning: "lợi ích", example: "Exercise has many health benefits.", level: 1 },
+            { word: "challenge", meaning: "thử thách", example: "Learning a new language is a big challenge.", level: 1 },
+            { word: "contribute", meaning: "đóng góp", example: "Everyone should contribute to the project.", level: 2 },
+            { word: "decrease", meaning: "giảm", example: "The temperature will decrease tonight.", level: 2 },
+            { word: "environment", meaning: "môi trường", example: "We must protect the environment.", level: 2 },
+            { word: "furthermore", meaning: "hơn nữa", example: "The plan is expensive; furthermore, it's risky.", level: 2 },
+            { word: "impact", meaning: "tác động", example: "Technology has a huge impact on our lives.", level: 3 },
+            { word: "maintain", meaning: "duy trì", example: "It's important to maintain good health.", level: 3 },
+            { word: "opportunity", meaning: "cơ hội", example: "This job is a great opportunity.", level: 3 },
+            { word: "participate", meaning: "tham gia", example: "All students should participate in class.", level: 3 },
+            { word: "requirement", meaning: "yêu cầu", example: "What are the requirements for this course?", level: 4 },
+            { word: "significant", meaning: "đáng kể", example: "There has been significant progress.", level: 4 },
+            { word: "strategy", meaning: "chiến lược", example: "We need a better marketing strategy.", level: 4 },
+            { word: "emphasize", meaning: "nhấn mạnh", example: "The teacher emphasized the importance of practice.", level: 5 },
+            { word: "enhance", meaning: "nâng cao", example: "This will enhance your skills.", level: 5 },
+            { word: "perspective", meaning: "góc nhìn", example: "Try to see things from a different perspective.", level: 5 },
+        ];
+
+        // ==================== GAME STATE ====================
+        let gameState = {
+            level: 1,
+            exp: 0,
+            expToNextLevel: 100,
+            score: 0,
+            combo: 0,
+            questionNumber: 1,
+            currentQuestion: null,
+            usedQuestions: [],
+            timer: null,
+            timeLeft: 30
+        };
+
+        // Load saved game state
+        function loadGameState() {
+            const saved = localStorage.getItem('englishQuestSave');
+            if (saved) {
+                const data = JSON.parse(saved);
+                gameState = { ...gameState, ...data, usedQuestions: [], currentQuestion: null, timer: null };
+            }
+        }
+
+        // Save game state
+        function saveGameState() {
+            const toSave = {
+                level: gameState.level,
+                exp: gameState.exp,
+                expToNextLevel: gameState.expToNextLevel,
+                score: gameState.score
+            };
+            localStorage.setItem('englishQuestSave', JSON.stringify(toSave));
+        }
+
+        // ==================== INITIALIZE ====================
+        function init() {
+            createParticles();
+            loadGameState();
+            updateUI();
+        }
+
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // ==================== GAME FLOW ====================
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            // Get available questions
+            const available = vocabulary.filter(q => !gameState.usedQuestions.includes(q.word));
+            
+            if (available.length === 0) {
+                gameState.usedQuestions = [];
+                loadQuestion();
+                return;
+            }
+
+            // Select random question
+            const question = available[Math.floor(Math.random() * available.length)];
+            gameState.currentQuestion = question;
+            gameState.usedQuestions.push(question.word);
+
+            // Generate wrong answers
+            const wrongAnswers = vocabulary
+                .filter(v => v.word !== question.word)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 3)
+                .map(v => v.meaning);
+
+            // Create answer options
+            const answers = [...wrongAnswers, question.meaning].sort(() => Math.random() - 0.5);
+
+            // Update UI
+            document.getElementById('questionNumber').textContent = `Câu hỏi ${gameState.questionNumber}`;
+            document.getElementById('questionText').textContent = question.word;
+            document.getElementById('questionExample').textContent = `"${question.example}"`;
+
+            // Render answers
+            const grid = document.getElementById('answersGrid');
+            grid.innerHTML = '';
+            answers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = answer;
+                btn.onclick = () => checkAnswer(answer);
+                grid.appendChild(btn);
+            });
+
+            // Start timer
+            startTimer();
+        }
+
+        function startTimer() {
+            gameState.timeLeft = 30;
+            const timerFill = document.getElementById('timerFill');
+            
+            clearInterval(gameState.timer);
+            gameState.timer = setInterval(() => {
+                gameState.timeLeft -= 0.1;
+                const percentage = (gameState.timeLeft / 30) * 100;
+                timerFill.style.width = percentage + '%';
+
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.timer);
+                    checkAnswer(null); // Time's up
+                }
+            }, 100);
+        }
+
+        function checkAnswer(answer) {
+            clearInterval(gameState.timer);
+            
+            const buttons = document.querySelectorAll('.answer-btn');
+            buttons.forEach(btn => btn.onclick = null); // Disable buttons
+
+            const correct = answer === gameState.currentQuestion.meaning;
+
+            if (correct) {
+                // Find and highlight correct button
+                buttons.forEach(btn => {
+                    if (btn.textContent === answer) {
+                        btn.classList.add('correct');
+                    }
+                });
+
+                // Update score and combo
+                gameState.combo++;
+                const basePoints = 10;
+                const comboBonus = gameState.combo * 5;
+                const timeBonus = Math.floor(gameState.timeLeft);
+                const totalPoints = basePoints + comboBonus + timeBonus;
+                
+                gameState.score += totalPoints;
+                addExp(20 + gameState.combo * 5);
+
+                // Show combo if >= 3
+                if (gameState.combo >= 3) {
+                    showCombo();
+                }
+
+                // Show feedback
+                setTimeout(() => {
+                    showFeedback(
+                        '✅',
+                        'Xuất sắc!',
+                        `+${totalPoints} điểm (Combo x${gameState.combo})\n"${gameState.currentQuestion.word}" nghĩa là "${gameState.currentQuestion.meaning}"`
+                    );
+                }, 500);
+
+            } else {
+                // Highlight correct and wrong answers
+                buttons.forEach(btn => {
+                    if (btn.textContent === gameState.currentQuestion.meaning) {
+                        btn.classList.add('correct');
+                    } else if (btn.textContent === answer) {
+                        btn.classList.add('wrong');
+                    }
+                });
+
+                // Reset combo
+                gameState.combo = 0;
+
+                // Show feedback
+                setTimeout(() => {
+                    showFeedback(
+                        '❌',
+                        'Chưa đúng!',
+                        `Đáp án đúng: "${gameState.currentQuestion.meaning}"\n"${gameState.currentQuestion.word}" - ${gameState.currentQuestion.meaning}\nVí dụ: ${gameState.currentQuestion.example}`
+                    );
+                }, 500);
+            }
+
+            updateUI();
+            saveGameState();
+        }
+
+        function showCombo() {
+            const display = document.getElementById('comboDisplay');
+            display.textContent = `🔥 COMBO x${gameState.combo}!`;
+            display.classList.add('show');
+            setTimeout(() => {
+                display.classList.remove('show');
+            }, 1000);
+        }
+
+        function showFeedback(icon, title, text) {
+            document.getElementById('feedbackIcon').textContent = icon;
+            document.getElementById('feedbackTitle').textContent = title;
+            document.getElementById('feedbackText').textContent = text;
+            document.getElementById('feedbackOverlay').style.display = 'flex';
+        }
+
+        function nextQuestion() {
+            document.getElementById('feedbackOverlay').style.display = 'none';
+            gameState.questionNumber++;
+            loadQuestion();
+        }
+
+        function addExp(amount) {
+            gameState.exp += amount;
+            
+            while (gameState.exp >= gameState.expToNextLevel) {
+                gameState.exp -= gameState.expToNextLevel;
+                gameState.level++;
+                gameState.expToNextLevel = Math.floor(gameState.expToNextLevel * 1.5);
+                
+                // Level up notification
+                showFeedback(
+                    '🎉',
+                    `LEVEL UP! Level ${gameState.level}`,
+                    `Chúc mừng! Bạn đã đạt level ${gameState.level}!`
+                );
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('combo').textContent = gameState.combo;
+            
+            const expPercentage = (gameState.exp / gameState.expToNextLevel) * 100;
+            document.getElementById('expBar').style.width = expPercentage + '%';
+            document.getElementById('expText').textContent = `${gameState.exp} / ${gameState.expToNextLevel} EXP`;
+        }
+
+        // ==================== START GAME ====================
+        init();
+    </script>
+</body>
+</html>
