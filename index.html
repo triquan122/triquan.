@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Quest - Adventure Learning Game</title>
+    <title>English Quest - Millionaire Edition</title>
     <style>
         * {
             margin: 0;
@@ -46,7 +46,7 @@
 
         .stats-container {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             max-width: 800px;
             margin: 0 auto;
             gap: 20px;
@@ -77,51 +77,95 @@
             font-weight: bold;
         }
 
-        .exp-bar-container {
-            max-width: 600px;
-            margin: 20px auto 0;
-            background: rgba(255, 255, 255, 0.1);
+        /* Main Container with Sidebar */
+        .main-container {
+            display: flex;
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+            gap: 30px;
+        }
+
+        /* Level Ladder Sidebar */
+        .level-ladder {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 10px;
+            padding: 20px;
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
         }
 
-        .exp-bar {
-            height: 25px;
-            background: linear-gradient(90deg, #a855f7, #00f5ff);
-            border-radius: 15px;
-            transition: width 0.5s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .exp-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: exp-shine 2s infinite;
-        }
-
-        @keyframes exp-shine {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        .exp-text {
+        .ladder-title {
             text-align: center;
-            margin-top: 5px;
-            font-size: 0.9em;
+            font-size: 1.3em;
+            color: #00f5ff;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .ladder-item {
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ladder-item.current {
+            background: linear-gradient(90deg, rgba(168, 85, 247, 0.3), rgba(0, 245, 255, 0.3));
+            border-color: #00f5ff;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 245, 255, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(0, 245, 255, 0.8); }
+        }
+
+        .ladder-item.completed {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+        }
+
+        .ladder-item.milestone {
+            background: rgba(255, 193, 7, 0.2);
+            border-color: #ffc107;
+        }
+
+        .ladder-item.milestone.completed {
+            background: rgba(255, 193, 7, 0.3);
+            border-color: #ffc107;
+        }
+
+        .ladder-level {
+            font-weight: bold;
             color: #00f5ff;
         }
 
-        /* Main Game Area */
+        .ladder-reward {
+            color: #ffd700;
+            font-size: 0.9em;
+        }
+
+        .ladder-icon {
+            font-size: 1.2em;
+            margin-left: 10px;
+        }
+
+        /* Game Container */
         .game-container {
+            flex: 1;
             max-width: 900px;
-            margin: 40px auto;
-            padding: 0 20px;
         }
 
         .question-card {
@@ -242,31 +286,7 @@
             75% { transform: translateX(10px); }
         }
 
-        /* Combo & Feedback */
-        .combo-display {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            font-size: 4em;
-            font-weight: bold;
-            color: #00f5ff;
-            text-shadow: 0 0 30px #00f5ff;
-            pointer-events: none;
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .combo-display.show {
-            transform: translate(-50%, -50%) scale(1);
-            animation: combo-pulse 0.5s ease;
-        }
-
-        @keyframes combo-pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.2); }
-        }
-
+        /* Feedback */
         .feedback-overlay {
             position: fixed;
             top: 0;
@@ -400,6 +420,18 @@
         }
 
         /* Responsive */
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column-reverse;
+            }
+            
+            .level-ladder {
+                width: 100%;
+                position: relative;
+                top: 0;
+            }
+        }
+
         @media (max-width: 768px) {
             .game-title {
                 font-size: 1.8em;
@@ -423,50 +455,52 @@
     <!-- Start Screen -->
     <div class="start-screen" id="startScreen">
         <div class="start-content">
-            <h1 class="start-title">🎮 ENGLISH QUEST</h1>
-            <p class="start-subtitle">Học tiếng Anh qua phiêu lưu</p>
-            <button class="start-btn" onclick="startGame()">BẮT ĐẦU PHIÊU LƯU</button>
+            <h1 class="start-title">🎮 ENGLISH MILLIONAIRE</h1>
+            <p class="start-subtitle">Ai là triệu phú tiếng Anh?</p>
+            <button class="start-btn" onclick="startGame()">BẮT ĐẦU THÁCH ĐẤU</button>
         </div>
     </div>
 
     <!-- Header -->
     <header class="header">
-        <h1 class="game-title">⚔️ ENGLISH QUEST</h1>
+        <h1 class="game-title">💰 ENGLISH MILLIONAIRE</h1>
         <div class="stats-container">
             <div class="stat-item">
-                <div class="stat-label">Level</div>
-                <div class="stat-value" id="level">1</div>
+                <div class="stat-label">Câu hỏi hiện tại</div>
+                <div class="stat-value" id="currentLevel">1</div>
             </div>
             <div class="stat-item">
-                <div class="stat-label">Điểm</div>
-                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">Tổng điểm</div>
+                <div class="stat-value" id="totalScore">0</div>
             </div>
             <div class="stat-item">
-                <div class="stat-label">Combo</div>
-                <div class="stat-value" id="combo">0</div>
+                <div class="stat-label">Lần chơi tốt nhất</div>
+                <div class="stat-value" id="bestScore">0</div>
             </div>
-        </div>
-        <div class="exp-bar-container">
-            <div class="exp-bar" id="expBar" style="width: 0%"></div>
-            <div class="exp-text" id="expText">0 / 100 EXP</div>
         </div>
     </header>
 
-    <!-- Main Game -->
-    <main class="game-container">
-        <div class="question-card" id="questionCard">
-            <div class="question-number" id="questionNumber">Câu hỏi 1</div>
-            <div class="question-text" id="questionText">Loading...</div>
-            <div class="question-example" id="questionExample"></div>
-            <div class="timer-bar">
-                <div class="timer-fill" id="timerFill" style="width: 100%"></div>
-            </div>
-            <div class="answers-grid" id="answersGrid"></div>
-        </div>
-    </main>
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Level Ladder -->
+        <aside class="level-ladder">
+            <div class="ladder-title">🏆 THANG ĐIỂM</div>
+            <div id="ladderItems"></div>
+        </aside>
 
-    <!-- Combo Display -->
-    <div class="combo-display" id="comboDisplay">🔥 COMBO x3!</div>
+        <!-- Game Container -->
+        <main class="game-container">
+            <div class="question-card" id="questionCard">
+                <div class="question-number" id="questionNumber">Câu hỏi 1</div>
+                <div class="question-text" id="questionText">Loading...</div>
+                <div class="question-example" id="questionExample"></div>
+                <div class="timer-bar">
+                    <div class="timer-fill" id="timerFill" style="width: 100%"></div>
+                </div>
+                <div class="answers-grid" id="answersGrid"></div>
+            </div>
+        </main>
+    </div>
 
     <!-- Feedback Overlay -->
     <div class="feedback-overlay" id="feedbackOverlay">
@@ -474,7 +508,7 @@
             <div class="feedback-icon" id="feedbackIcon">✅</div>
             <div class="feedback-title" id="feedbackTitle">Chính xác!</div>
             <div class="feedback-text" id="feedbackText"></div>
-            <button class="continue-btn" onclick="nextQuestion()">Tiếp tục</button>
+            <button class="continue-btn" onclick="handleFeedbackAction()">Tiếp tục</button>
         </div>
     </div>
 
@@ -499,46 +533,58 @@
             { word: "emphasize", meaning: "nhấn mạnh", example: "The teacher emphasized the importance of practice.", level: 5 },
             { word: "enhance", meaning: "nâng cao", example: "This will enhance your skills.", level: 5 },
             { word: "perspective", meaning: "góc nhìn", example: "Try to see things from a different perspective.", level: 5 },
+            { word: "accomplish", meaning: "hoàn thành", example: "We accomplished our goal ahead of schedule.", level: 4 },
+            { word: "particular", meaning: "cụ thể, đặc biệt", example: "This particular problem needs attention.", level: 3 },
+        ];
+
+        // Level rewards (Millionaire-style)
+        const levelRewards = [
+            { level: 1, reward: "100", milestone: false },
+            { level: 2, reward: "200", milestone: false },
+            { level: 3, reward: "500", milestone: false },
+            { level: 4, reward: "1,000", milestone: false },
+            { level: 5, reward: "2,000", milestone: true },  // Safe point
+            { level: 6, reward: "5,000", milestone: false },
+            { level: 7, reward: "10,000", milestone: false },
+            { level: 8, reward: "25,000", milestone: false },
+            { level: 9, reward: "50,000", milestone: false },
+            { level: 10, reward: "100,000", milestone: true }, // Winner!
         ];
 
         // ==================== GAME STATE ====================
         let gameState = {
-            level: 1,
-            exp: 0,
-            expToNextLevel: 100,
-            score: 0,
-            combo: 0,
-            questionNumber: 1,
+            currentLevel: 1,
+            totalScore: 0,
+            bestScore: 0,
             currentQuestion: null,
             usedQuestions: [],
             timer: null,
-            timeLeft: 30
+            timeLeft: 30,
+            isWrong: false
         };
 
         // Load saved game state
         function loadGameState() {
-            const saved = localStorage.getItem('englishQuestSave');
+            const saved = localStorage.getItem('englishMillionaireSave');
             if (saved) {
                 const data = JSON.parse(saved);
-                gameState = { ...gameState, ...data, usedQuestions: [], currentQuestion: null, timer: null };
+                gameState.bestScore = data.bestScore || 0;
             }
         }
 
         // Save game state
         function saveGameState() {
             const toSave = {
-                level: gameState.level,
-                exp: gameState.exp,
-                expToNextLevel: gameState.expToNextLevel,
-                score: gameState.score
+                bestScore: gameState.bestScore
             };
-            localStorage.setItem('englishQuestSave', JSON.stringify(toSave));
+            localStorage.setItem('englishMillionaireSave', JSON.stringify(toSave));
         }
 
         // ==================== INITIALIZE ====================
         function init() {
             createParticles();
             loadGameState();
+            createLadder();
             updateUI();
         }
 
@@ -556,10 +602,61 @@
             }
         }
 
+        // Create level ladder
+        function createLadder() {
+            const container = document.getElementById('ladderItems');
+            container.innerHTML = '';
+            
+            // Reverse order (10 to 1)
+            for (let i = levelRewards.length - 1; i >= 0; i--) {
+                const item = levelRewards[i];
+                const div = document.createElement('div');
+                div.className = 'ladder-item';
+                if (item.milestone) div.classList.add('milestone');
+                div.id = `ladder-${item.level}`;
+                
+                div.innerHTML = `
+                    <span class="ladder-level">Câu ${item.level}</span>
+                    <span class="ladder-reward">${item.reward} điểm</span>
+                    <span class="ladder-icon"></span>
+                `;
+                
+                container.appendChild(div);
+            }
+        }
+
+        // Update ladder UI
+        function updateLadder() {
+            levelRewards.forEach(item => {
+                const element = document.getElementById(`ladder-${item.level}`);
+                element.classList.remove('current', 'completed');
+                
+                if (item.level < gameState.currentLevel) {
+                    element.classList.add('completed');
+                    element.querySelector('.ladder-icon').textContent = '✓';
+                } else if (item.level === gameState.currentLevel) {
+                    element.classList.add('current');
+                    element.querySelector('.ladder-icon').textContent = '👉';
+                } else {
+                    element.querySelector('.ladder-icon').textContent = '';
+                }
+            });
+        }
+
         // ==================== GAME FLOW ====================
         function startGame() {
             document.getElementById('startScreen').style.display = 'none';
+            resetGame();
             loadQuestion();
+        }
+
+        function resetGame() {
+            gameState.currentLevel = 1;
+            gameState.totalScore = 0;
+            gameState.usedQuestions = [];
+            gameState.isWrong = false;
+            updateUI();
+            updateLadder();
         }
 
         function loadQuestion() {
@@ -588,7 +685,7 @@
             const answers = [...wrongAnswers, question.meaning].sort(() => Math.random() - 0.5);
 
             // Update UI
-            document.getElementById('questionNumber').textContent = `Câu hỏi ${gameState.questionNumber}`;
+            document.getElementById('questionNumber').textContent = `Câu hỏi ${gameState.currentLevel} / 10`;
             document.getElementById('questionText').textContent = question.word;
             document.getElementById('questionExample').textContent = `"${question.example}"`;
 
@@ -628,76 +725,81 @@
             clearInterval(gameState.timer);
             
             const buttons = document.querySelectorAll('.answer-btn');
-            buttons.forEach(btn => btn.onclick = null); // Disable buttons
+            buttons.forEach(btn => btn.onclick = null);
 
             const correct = answer === gameState.currentQuestion.meaning;
 
             if (correct) {
-                // Find and highlight correct button
+                // Highlight correct button
                 buttons.forEach(btn => {
                     if (btn.textContent === answer) {
                         btn.classList.add('correct');
                     }
                 });
 
-                // Update score and combo
-                gameState.combo++;
-                const basePoints = 10;
-                const comboBonus = gameState.combo * 5;
-                const timeBonus = Math.floor(gameState.timeLeft);
-                const totalPoints = basePoints + comboBonus + timeBonus;
-                
-                gameState.score += totalPoints;
-                addExp(20 + gameState.combo * 5);
+                // Add score
+                const reward = parseInt(levelRewards[gameState.currentLevel - 1].reward.replace(/,/g, ''));
+                gameState.totalScore += reward;
 
-                // Show combo if >= 3
-                if (gameState.combo >= 3) {
-                    showCombo();
+                // Check if won
+                if (gameState.currentLevel === 10) {
+                    gameState.isWrong = false;
+                    setTimeout(() => {
+                        showFeedback(
+                            '🎉',
+                            'CHIẾN THẮNG!',
+                            `Chúc mừng! Bạn đã chinh phục 10 câu hỏi!\nTổng điểm: ${gameState.totalScore.toLocaleString()} điểm`
+                        );
+                    }, 800);
+                } else {
+                    setTimeout(() => {
+                        showFeedback(
+                            '✅',
+                            'Chính xác!',
+                            `+${reward.toLocaleString()} điểm\n"${gameState.currentQuestion.word}" nghĩa là "${gameState.currentQuestion.meaning}"`
+                        );
+                    }, 500);
                 }
-
-                // Show feedback
-                setTimeout(() => {
-                    showFeedback(
-                        '✅',
-                        'Xuất sắc!',
-                        `+${totalPoints} điểm (Combo x${gameState.combo})\n"${gameState.currentQuestion.word}" nghĩa là "${gameState.currentQuestion.meaning}"`
-                    );
-                }, 500);
 
             } else {
                 // Highlight correct and wrong answers
                 buttons.forEach(btn => {
                     if (btn.textContent === gameState.currentQuestion.meaning) {
                         btn.classList.add('correct');
-                    } else if (btn.textContent === answer) {
+                    } else if (btn.textContent === answer || answer === null) {
                         btn.classList.add('wrong');
                     }
                 });
 
-                // Reset combo
-                gameState.combo = 0;
+                gameState.isWrong = true;
 
-                // Show feedback
+                // Calculate final score (last milestone)
+                let finalScore = 0;
+                for (let i = gameState.currentLevel - 1; i >= 0; i--) {
+                    if (levelRewards[i].milestone) {
+                        finalScore = parseInt(levelRewards[i].reward.replace(/,/g, ''));
+                        break;
+                    }
+                }
+
                 setTimeout(() => {
                     showFeedback(
                         '❌',
-                        'Chưa đúng!',
-                        `Đáp án đúng: "${gameState.currentQuestion.meaning}"\n"${gameState.currentQuestion.word}" - ${gameState.currentQuestion.meaning}\nVí dụ: ${gameState.currentQuestion.example}`
+                        'Trả lời sai!',
+                        `Đáp án đúng: "${gameState.currentQuestion.meaning}"\n\nBạn về mốc an toàn với ${finalScore.toLocaleString()} điểm\n\n"${gameState.currentQuestion.word}" - ${gameState.currentQuestion.meaning}\nVí dụ: ${gameState.currentQuestion.example}`
                     );
                 }, 500);
+
+                gameState.totalScore = finalScore;
+            }
+
+            // Update best score
+            if (gameState.totalScore > gameState.bestScore) {
+                gameState.bestScore = gameState.totalScore;
+                saveGameState();
             }
 
             updateUI();
-            saveGameState();
-        }
-
-        function showCombo() {
-            const display = document.getElementById('comboDisplay');
-            display.textContent = `🔥 COMBO x${gameState.combo}!`;
-            display.classList.add('show');
-            setTimeout(() => {
-                display.classList.remove('show');
-            }, 1000);
         }
 
         function showFeedback(icon, title, text) {
@@ -707,37 +809,25 @@
             document.getElementById('feedbackOverlay').style.display = 'flex';
         }
 
-        function nextQuestion() {
+        function handleFeedbackAction() {
             document.getElementById('feedbackOverlay').style.display = 'none';
-            gameState.questionNumber++;
-            loadQuestion();
-        }
-
-        function addExp(amount) {
-            gameState.exp += amount;
             
-            while (gameState.exp >= gameState.expToNextLevel) {
-                gameState.exp -= gameState.expToNextLevel;
-                gameState.level++;
-                gameState.expToNextLevel = Math.floor(gameState.expToNextLevel * 1.5);
-                
-                // Level up notification
-                showFeedback(
-                    '🎉',
-                    `LEVEL UP! Level ${gameState.level}`,
-                    `Chúc mừng! Bạn đã đạt level ${gameState.level}!`
-                );
+            if (gameState.isWrong || gameState.currentLevel === 10) {
+                // Game over or won - restart
+                document.getElementById('startScreen').style.display = 'flex';
+                resetGame();
+            } else {
+                // Continue to next question
+                gameState.currentLevel++;
+                updateLadder();
+                loadQuestion();
             }
         }
 
         function updateUI() {
-            document.getElementById('level').textContent = gameState.level;
-            document.getElementById('score').textContent = gameState.score;
-            document.getElementById('combo').textContent = gameState.combo;
-            
-            const expPercentage = (gameState.exp / gameState.expToNextLevel) * 100;
-            document.getElementById('expBar').style.width = expPercentage + '%';
-            document.getElementById('expText').textContent = `${gameState.exp} / ${gameState.expToNextLevel} EXP`;
+            document.getElementById('currentLevel').textContent = gameState.currentLevel;
+            document.getElementById('totalScore').textContent = gameState.totalScore.toLocaleString();
+            document.getElementById('bestScore').textContent = gameState.bestScore.toLocaleString();
         }
 
         // ==================== START GAME ====================
